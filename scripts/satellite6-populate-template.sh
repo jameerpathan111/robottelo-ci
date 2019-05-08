@@ -451,18 +451,27 @@ fi
 SMARTPROXYID=$(satellite --csv proxy list | grep "${HOSTNAME}" | awk -F ',' '{print $1}')
 echo SMART-PROXY ID: "${SMARTPROXYID}"
 
-echo Adding Smart-Proxy to Default location and to 'Default Organization'
-satellite_runner location add-smart-proxy --id="${LOC}" --smart-proxy-id="${SMARTPROXYID}"
-satellite_runner organization add-smart-proxy --id="${ORG}" --smart-proxy-id="${SMARTPROXYID}"
+# To fix mismatch of capsule and environment in satellite 6.6
+if [ "${SAT_VERSION}" = "6.6" ]; then
+    satellite_runner organization update --id="${ORG}" --smart-proxy-ids="${SMARTPROXYID}"
+    satellite_runner organization update --id="${ORG}" --environment-ids="${PUPPET_ENV}"
 
-echo Adding Default Organization to Default Location
-satellite_runner location add-organization --id="${LOC}" --organization='Default Organization'
+    satellite_runner capsule update --id="${CAPSULE_ID}" --location-ids="${LOC}"
+    satellite_runner environment update --id="${SMARTPROXYID}" --location-ids="${LOC}"
+else
+    echo Adding Smart-Proxy to Default location and to 'Default Organization'
+    satellite_runner location add-smart-proxy --id="${LOC}" --smart-proxy-id="${SMARTPROXYID}"
+    satellite_runner organization add-smart-proxy --id="${ORG}" --smart-proxy-id="${SMARTPROXYID}"
 
-echo Assign Default Organization and Default Location to Production Puppet Environment.
-satellite_runner environment update --organization-ids "${ORG}" --location-ids "${LOC}" --id 1
+    echo Adding Default Organization to Default Location
+    satellite_runner location add-organization --id="${LOC}" --organization='Default Organization'
 
-# Import puppet-classes from default capsule  to environment.
-satellite_runner capsule import-classes --id 1 --environment-id 1
+    echo Assign Default Organization and Default Location to Production Puppet Environment.
+    satellite_runner environment update --organization-ids "${ORG}" --location-ids "${LOC}" --id 1
+
+    # Import puppet-classes from default capsule  to environment.
+    satellite_runner capsule import-classes --id 1 --environment-id 1
+fi
 
 # Populate the RHEL6 and RHEL7 OS ID
 
@@ -490,7 +499,7 @@ if [ "${SAT_VERSION}" = "6.3" ]; then
 
     satellite_runner hostgroup set-parameter --hostgroup='RHEL 7 Server 64-bit HG' --name='kt_activation_keys' --value='ak-rhel-7'
 
-elif [ "${SAT_VERSION}" = "6.4" ] || [ "${SAT_VERSION}" == "6.5" ]; then
+elif [ "${SAT_VERSION}" = "6.4" ] || [ "${SAT_VERSION}" == "6.5" ] || [ "${SAT_VERSION}" == "6.6" ]; then
     RHEL7_KS=$(satellite --csv repository list | awk -F "," '/Server Kickstart x86_64 7/ {print $2}')
     echo "RHEL7 KS is: ${RHEL7_KS}"
 
