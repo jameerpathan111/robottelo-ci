@@ -1,0 +1,8 @@
+---
+- name: "Set a Setting"
+  foreman_setting:
+    username: "{{ username }}"
+    password: "{{ password }}"
+    server_url: "{{ server }}"
+    name: "{{ setting_name }}"
+    value: "{{ setting_value }}"

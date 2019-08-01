@@ -1,0 +1,45 @@
+---
+- name: satellite6-populate-template
+  hosts: localhost
+  vars:
+    username: admin
+    password: changeme
+    server: ansible_facts['fqdn']
+  tasks:
+    - name: Create lifecycle-environments
+      import_tasks: tasks/create_lifecycle_environment.yml
+      loop:
+        - lifecycle_environment_name: "DEV"
+          organization: "Default Organization"
+          prior: "Library"
+        - lifecycle_environment_name: "QE"
+          organization: "Default Organization"
+          prior: "DEV"
+        - lifecycle_environment_name: "PROD"
+          organization: "Default Organization"
+          prior: "QE"
+
+    - name: Update the DOWNLOAD_POLICY to sync content.
+      import_tasks: tasks/satellite_setting.yml
+      loop:
+        - setting_name: "default_download_policy"
+          setting_value: "{{ lookup('env','DOWNLOAD_POLICY') }}"
+
+    - name: Check if manifest already present or not.
+      stat:
+        path: "{{ lookup('env','HOME') }}/manifest-latest.zip"
+        register: manifest_latest
+
+    - name: Fetch the manifest from server.
+        get_url:
+          url: "{{ lookup('env','{MANIFEST_LOCATION_URL}') }}"
+          dest: "{{ lookup('env','HOME') }}/manifest-latest.zip"
+        when: manifest_latest.stat.exists == true
+
+    - name: Import Manifest.
+        import_tasks: tasks/manifest_upload.yml
+        loop:
+          - organization: "Default Organization"
+            manifest_path: "{{ lookup('env','HOME') }}/manifest-latest.zip"
+    - name: Enable Red Hat repositories
+    - name: Synchronize all repositories except for Puppet repositories which don't have URLs

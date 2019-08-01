@@ -1,0 +1,8 @@
+- name: "Upload the RHEL developer edition manifest"
+  katello_manifest:
+    username: "{{ username }}"
+    password: "{{ password }}"
+    server_url: "{{ server }}"
+    organization: "{{ organization }}"
+    state: present
+    manifest_path: "{{ manifest_path }}"
