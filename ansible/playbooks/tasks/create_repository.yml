@@ -1,0 +1,13 @@
+- name: "Create repository"
+  katello_repository:
+    username: "{{ username }}"
+    password: "{{ password }}"
+    server_url: "{{ server }}"
+    name: "{{ repo_name }}"
+    state: present
+    content_type: "yum"
+    product: "{{ product }}"
+    organization: "{{ organization }}"
+    url: "{{ repo_url }}"
+    mirror_on_sync: true
+    download_policy: "{{ download_policy }}"

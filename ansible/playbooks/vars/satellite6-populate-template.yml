@@ -1,0 +1,19 @@
+---
+SATELLITE_DISTRIBUTION: "GA"
+DOWNLOAD_POLICY: "immediate"
+SAT_VERSION: "6.5"
+RHEL6_TOOLS_PRD: "Red Hat Enterprise Linux Server"
+RHEL6_TOOLS_REPO: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+RHEL6_TOOLS_URL: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+RHEL7_TOOLS_PRD: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+RHEL7_TOOLS_REPO: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+RHEL7_TOOLS_URL: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+SAT6C6_PRODUCT: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+CAPSULE6_REPO: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+CAPSULE6_URL: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+SAT6C7_PRODUCT: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+CAPSULE7_REPO: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+CAPSULE7_URL: "Red Hat Satellite Tools 6.5 for RHEL 6 Server RPMs x86_64"
+SAT6M7_PRODUCT: 'maintain7_url'
+MAINTAIN7_REPO: 'maintain7_url'
+MAINTAIN7_URL: 'maintain7_url'
