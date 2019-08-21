@@ -5,7 +5,7 @@
     password: "{{ password }}"
     server_url: "{{ server }}"
     verify_ssl: False
-    name: "{{ lifecycle_environment_name }}"
-    organization: "{{ organization }}"
-    prior: "{{ prior }}"
+    name: "{{ item.lifecycle_environment_name }}"
+    organization: "{{ item.organization }}"
+    prior: "{{ item.prior }}"
     state: 'present'

@@ -3,8 +3,8 @@
     username: "{{ username }}"
     password: "{{ password }}"
     server_url: "{{ server }}"
-    name: "{{ product }}"
-    organization: "{{ organization }}"
+    name: "{{ item.product }}"
+    organization: "{{ item.organization }}"
     state: present
 
 - name: "Enable Red Hat repositories"
@@ -12,12 +12,12 @@
     username: "{{ username }}"
     password: "{{ password }}"
     server_url: "{{ server }}"
-    name: "{{ repo_name }}"
-    organization: "{{ organization }}"
-    product: "{{ product }}"
+    name: "{{ item.repo_name }}"
+    organization: "{{ item.organization }}"
+    product: "{{ item.product }}"
     repositories:
-    - releasever: "{{ releasever }}"
-      basearch: "{{ basearch }}"
+    - releasever: "{{ item.releasever }}"
+      basearch: "{{ item.basearch }}"
     state: enabled
 
 - name: "Sync repository"
@@ -25,6 +25,6 @@
     username: "{{ username }}"
     password: "{{ password }}"
     server_url: "{{ server }}"
-    repository: "{{ repo_name }}"
-    product: "{{ product }}"
-    organization: "{{ organization }}"
+    repository: "{{ item.repo_name }}"
+    product: "{{ item.product }}"
+    organization: "{{ item.organization }}"

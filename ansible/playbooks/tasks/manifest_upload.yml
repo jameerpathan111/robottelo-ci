@@ -3,6 +3,6 @@
     username: "{{ username }}"
     password: "{{ password }}"
     server_url: "{{ server }}"
-    organization: "{{ organization }}"
+    organization: "{{ item.organization }}"
     state: present
-    manifest_path: "{{ manifest_path }}"
+    manifest_path: "{{ item.manifest_path }}"

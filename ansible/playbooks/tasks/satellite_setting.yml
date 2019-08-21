@@ -4,5 +4,5 @@
     username: "{{ username }}"
     password: "{{ password }}"
     server_url: "{{ server }}"
-    name: "{{ setting_name }}"
-    value: "{{ setting_value }}"
+    name: "{{ item.setting_name }}"
+    value: "{{ item.setting_value }}"
