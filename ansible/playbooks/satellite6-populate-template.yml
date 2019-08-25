@@ -307,6 +307,7 @@
         loop:
           - organization: "{{ organization }}"
             cv_name: "Capsule RHEL 7 CV"
+            lifecycle_environment: "DEV"
         when:
           - "{{ RHELOS }}" == "7"
     - name: Add content to content views Capsule RHEL 6 CV
@@ -331,5 +332,26 @@
         loop:
           - organization: "{{ organization }}"
             cv_name: "Capsule RHEL 6 CV"
+            lifecycle_environment: "DEV"
         when:
           - "{{ RHELOS }}" != "7"
+    - name: Create activation keys
+        include_tasks: tasks/create_activation_key.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-7"
+            content_view: "RHEL 7 CV"
+            lifecycle_environment: "DEV"
+            auto_attach: False
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-6"
+            content_view: "RHEL 6 CV"
+            lifecycle_environment: "DEV"
+            auto_attach: False
+          - organization: "{{ organization }}"
+            ak_name: ak-capsule-{{ RHELOS }}
+            content_view: "RHEL 7 CV"
+            lifecycle_environment: "DEV"
+            auto_attach: False
+    - name: Add Subscriptions to both RHEL6 and RHEL7 Activation keys. Line 326 onwards
+    - name:
