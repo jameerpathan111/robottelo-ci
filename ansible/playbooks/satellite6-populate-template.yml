@@ -354,4 +354,116 @@
             lifecycle_environment: "DEV"
             auto_attach: False
     - name: Add Subscriptions to both RHEL6 and RHEL7 Activation keys. Line 326 onwards
-    - name:
+    - name: Add Subscriptions to part1
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-7"
+            subscription_name: "Red Hat Satellite Infrastructure Subscription"
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-6"
+            subscription_name: "Red Hat Satellite Infrastructure Subscription"
+    - name: Add Subscriptions to part2
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-7"
+            subscription_name: "{{ RHEL7_TOOLS_PRD }}"
+          - organization: "{{ organization }}"
+            ak_name: "ak-rhel-6"
+            subscription_name: "{{ RHEL6_TOOLS_PRD }}"
+        when:
+          - "{{ SATELLITE_DISTRIBUTION }}" != "GA"
+          - "{{ SATELLITE_DISTRIBUTION }}" != "BETA"
+    - name: Add Subscriptions to part3. Doesn't seem right. check once more. issue CAPSULE7_SUBS_ID
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            subscription_name: "Red Hat Satellite Infrastructure Subscription"
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            subscription_name: "{{ SAT6M7_PRODUCT }}"
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            subscription_name: "Red Hat Enterprise Linux Server, Premium (Physical or Virtual Nodes)"
+        when:
+          - "{{ RHELOS }}" == "7"
+
+    - name: Add Subscriptions to part4
+        include_tasks: tasks/ak_content_override.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            label: rhel-server-rhscl-7-rpms
+            override: enabled
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            label: rhel-7-server-ansible-2-rpms
+            override: enabled
+        when:
+          - "{{ RHELOS }}" == "7"
+    - name: Add Subscriptions to part5
+        include_tasks: tasks/ak_content_override.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            label: rhel-7-server-satellite-maintenance-6-rpms
+            override: enabled
+        when:
+          - "{{ RHELOS }}" == "7"
+          - "{{ SATELLITE_DISTRIBUTION }}" == "GA"
+    - name: Add Subscriptions to part6
+        include_tasks: tasks/ak_content_override.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            label: rhel-7-server-satellite-maintenance-6-beta-rpms
+            override: enabled
+        when:
+          - "{{ RHELOS }}" == "7"
+          - "{{ SATELLITE_DISTRIBUTION }}" == "BETA"
+    - name: Add Subscriptions to part7.
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-7"
+            subscription_name: "{{ RHEL7_TOOLS_PRD }}"
+        when:
+          - "{{ RHELOS }}" == "7"
+          - "{{ SATELLITE_DISTRIBUTION }}" != "BETA"
+          - "{{ SATELLITE_DISTRIBUTION }}" != "GA"
+    - name: Add Subscriptions to ak-capsule-6 part8.
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-6"
+            subscription_name: "{{ SAT6C6_PRODUCT }}"
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-6"
+            subscription_name: "Red Hat Satellite Infrastructure Subscription"
+        when:
+          - "{{ RHELOS }}" != "7"
+    - name: Add Subscriptions to ak-capsule-6 part9.
+        include_tasks: tasks/add_subscriptions_to_ak.yml
+        loop:
+          - organization: "{{ organization }}"
+            ak_name: "ak-capsule-6"
+            subscription_name: "{{ RHEL6_TOOLS_PRD }}"
+        when:
+          - "{{ RHELOS }}" != "7"
+          - "{{ SATELLITE_DISTRIBUTION }}" != "BETA"
+          - "{{ SATELLITE_DISTRIBUTION }}" != "GA"
+    - name: Update Domain with Capsule's ID.
+        - name: "Read a Setting"
+        foreman_search_facts:
+          username: "admin"
+          password: "changeme"
+          server_url: "https://foreman.example.com"
+          resource: settings
+          search: name = http_proxy
+        register: result
+        - debug:
+            var: result.resources[0].value
+    - name: Create subnet and associate various entities to it.
+    - name: Create Libvirt CR
