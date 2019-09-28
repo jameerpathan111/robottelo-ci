@@ -454,16 +454,25 @@
           - "{{ RHELOS }}" != "7"
           - "{{ SATELLITE_DISTRIBUTION }}" != "BETA"
           - "{{ SATELLITE_DISTRIBUTION }}" != "GA"
-    - name: Update Domain with Capsule's ID.
-        - name: "Read a Setting"
-        foreman_search_facts:
-          username: "admin"
-          password: "changeme"
-          server_url: "https://foreman.example.com"
-          resource: settings
-          search: name = http_proxy
-        register: result
-        - debug:
-            var: result.resources[0].value
+    # Update Domain with Capsule's ID.
+    - name: getting Domain name
+      command: hostname -d
+        register: domain_name
+
+    - name: Update Domain
+      foreman_domain:
+        name: {{ domain_name.stdout }}
+        locations:
+          - "{{ location }}"  # To Do, missing var
+        organizations:
+          - "{{ organization }}"
+        server_url: "{{ server }}"
+        username: "{{ username }}"
+        password: "{{ password }}"
+        parameters:
+          - name: "dns-id"
+            parameter_type: "integer"
+            value: 1
+        state: present
     - name: Create subnet and associate various entities to it.
     - name: Create Libvirt CR
