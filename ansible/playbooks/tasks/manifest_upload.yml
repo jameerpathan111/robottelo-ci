@@ -2,7 +2,7 @@
   katello_manifest:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     organization: "{{ item.organization }}"
     state: present
     manifest_path: "{{ item.manifest_path }}"

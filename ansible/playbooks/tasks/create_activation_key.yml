@@ -2,7 +2,7 @@
   katello_activation_key:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     name: "{{ item.ak_name }}"
     organization: "{{ item.organization }}"
     lifecycle_environment: "{{ item.lifecycle_environment }}"

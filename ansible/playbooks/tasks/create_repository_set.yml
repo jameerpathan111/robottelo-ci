@@ -2,7 +2,7 @@
   katello_product:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     name: "{{ item.product }}"
     organization: "{{ item.organization }}"
     state: present
@@ -11,7 +11,7 @@
   katello_repository_set:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     name: "{{ item.repo_name }}"
     organization: "{{ item.organization }}"
     product: "{{ item.product }}"
@@ -24,7 +24,7 @@
   katello_sync:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     repository: "{{ item.repo_name }}"
     product: "{{ item.product }}"
     organization: "{{ item.organization }}"

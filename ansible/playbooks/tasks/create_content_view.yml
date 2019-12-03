@@ -2,6 +2,6 @@
   katello_content_view:
     username: "{{ username }}"
     password: "{{ password }}"
-    server_url: "{{ server }}"
+    server_url: "{{ server_url }}"
     name: "{{ item.cv_name }}"
     organization: "{{ item.organization }}"
