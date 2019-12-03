@@ -20,12 +20,3 @@
     url: "{{ item.repo_url }}"
     mirror_on_sync: true
     download_policy: "{{ item.download_policy }}"
-
-- name: "Sync repository"
-  katello_sync:
-    username: "{{ username }}"
-    password: "{{ password }}"
-    server_url: "{{ server_url }}"
-    repository: "{{ item.repo_name }}"
-    product: "{{ item.product }}"
-    organization: "{{ item.organization }}"

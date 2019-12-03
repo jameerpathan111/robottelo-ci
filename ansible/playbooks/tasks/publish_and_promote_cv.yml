@@ -7,3 +7,4 @@
     organization: "{{ item.organization }}"
     lifecycle_environments:
       - "{{ item.lifecycle_environment }}"
+      -

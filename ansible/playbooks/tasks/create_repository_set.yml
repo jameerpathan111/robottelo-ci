@@ -16,15 +16,6 @@
     organization: "{{ item.organization }}"
     product: "{{ item.product }}"
     repositories:
-    - releasever: "{{ item.releasever }}"
-      basearch: "{{ item.basearch }}"
+    - releasever: "{{ item.releasever | default(omit) }}"
+      basearch: "{{ item.basearch | default(omit) }}"
     state: enabled
-
-- name: "Sync repository"
-  katello_sync:
-    username: "{{ username }}"
-    password: "{{ password }}"
-    server_url: "{{ server_url }}"
-    repository: "{{ item.repo_name }}"
-    product: "{{ item.product }}"
-    organization: "{{ item.organization }}"

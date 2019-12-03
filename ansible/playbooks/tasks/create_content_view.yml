@@ -5,3 +5,4 @@
     server_url: "{{ server_url }}"
     name: "{{ item.cv_name }}"
     organization: "{{ item.organization }}"
+    repositories: "{{ item.repositories }}"

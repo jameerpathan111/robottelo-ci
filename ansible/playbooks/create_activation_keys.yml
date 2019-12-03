@@ -9,6 +9,7 @@
     SATELLITE_DISTRIBUTION: "{{ lookup('env','SATELLITE_DISTRIBUTION') }}"
     DOWNLOAD_POLICY: "{{ lookup('env','DOWNLOAD_POLICY') }}"
     SAT_VERSION: "{{ lookup('env','SAT_VERSION') }}"
+    MANIFEST_LOCATION_URL: "{{ lookup('env', 'MANIFEST_LOCATION_URL') }}"
     organization: "Test Organization"
   tasks:
     - name: Load vars when SATELLITE_DISTRIBUTION == BETA
@@ -22,6 +23,7 @@
       when:
         - SATELLITE_DISTRIBUTION != "GA"
         - SATELLITE_DISTRIBUTION != "BETA"
+
     - name: Create lifecycle-environments
       include_tasks: tasks/create_lifecycle_environment.yml
       loop:
@@ -34,3 +36,235 @@
         - lifecycle_environment_name: "PROD"
           organization: "{{ organization }}"
           prior: "QE"
+
+    - name: Update the DOWNLOAD_POLICY to sync content.
+      include_tasks: tasks/satellite_setting.yml
+      loop:
+        - setting_name: "default_download_policy"
+          setting_value: "{{ DOWNLOAD_POLICY }}"
+
+    - name: Check if manifest already present or not.
+      stat:
+        path: "/root/manifest-latest.zip"
+      register: manifest_latest
+
+    - name: Fetch the manifest from server.
+      get_url:
+        url: "{{ MANIFEST_LOCATION_URL }}"
+        dest: "/root/manifest-latest.zip"
+      when: manifest_latest.stat.exists == False
+
+    - name: Import Manifest.
+      include_tasks: tasks/manifest_upload.yml
+      loop:
+        - organization: "{{ organization }}"
+          manifest_path: "/root/manifest-latest.zip"
+
+
+    - name: Enable Red Hat repositories
+      include_tasks: tasks/create_repository_set.yml
+      loop:
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Enterprise Linux 7 Server (Kickstart)"
+          product: "Red Hat Enterprise Linux Server"
+          releasever: "7.7"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Enterprise Linux 6 Server (Kickstart)"
+          product: "Red Hat Enterprise Linux Server"
+          releasever: "6.10"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Enterprise Linux 7 Server (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          releasever: "7Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Enterprise Linux 6 Server (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          releasever: "6Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Ansible Engine 2 RPMs for Red Hat Enterprise Linux 7 Server"
+          product: "Red Hat Ansible Engine"
+          basearch: "x86_64"
+
+    - name: Enable Red Hat repository Red Hat Software Collections for sat 6.7
+      include_tasks: tasks/create_repository_set.yml
+      loop:
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server"
+          product: "Red Hat Software Collections (for RHEL Server)"
+          releasever: "7Server"
+          basearch: "x86_64"
+      when: SAT_VERSION == "6.7"
+
+    - name: Enable Red Hat repository Red Hat Software Collections
+      include_tasks: tasks/create_repository_set.yml
+      loop:
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server"
+          product: "Red Hat Software Collections for RHEL Server"
+          releasever: "7Server"
+          basearch: "x86_64"
+      when: SAT_VERSION != "6.7"
+
+    - name: Enable Red Hat repositories when SATELLITE_DISTRIBUTION = "BETA"
+      include_tasks: tasks/create_repository_set.yml
+      loop:
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Maintenance 6 Beta (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Tools 6 Beta (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Tools 6 Beta (for RHEL 6 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Capsule 6 Beta (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Satellite Capsule Beta"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Capsule 6 Beta (for RHEL 6 Server) (RPMs)"
+          product: "Red Hat Satellite Capsule Beta"
+          basearch: "x86_64"
+      when: SATELLITE_DISTRIBUTION == "BETA"
+
+    - name: Enable Red Hat repositories when SATELLITE_DISTRIBUTION = "GA"
+      include_tasks: tasks/create_repository_set.yml
+      loop:
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Tools {{ SAT_VERSION }} (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Tools {{ SAT_VERSION }} (for RHEL 6 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Capsule {{ SAT_VERSION }} (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Capsule {{ SAT_VERSION }} (for RHEL 6 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+        - organization: "{{ organization }}"
+          repo_name: "Red Hat Satellite Maintenance 6 (for RHEL 7 Server) (RPMs)"
+          product: "Red Hat Enterprise Linux Server"
+          basearch: "x86_64"
+      when: SATELLITE_DISTRIBUTION == "GA"
+
+    - name:  Create Repos and Sync Repositories. Create both Tools for RHEL6 and RHEL7 and Capsule for RHEL6 and RHEL7
+      include_tasks: tasks/create_repository.yml
+      loop:
+        - organization: "{{ organization }}"
+          product: "{{ RHEL6_TOOLS_PRD }}"
+          repo_name: "{{ RHEL6_TOOLS_REPO }}"
+          repo_url: "{{ RHEL6_TOOLS_URL }}"
+          download_policy: "{{ DOWNLOAD_POLICY }}"
+        - organization: "{{ organization }}"
+          product: "{{ RHEL7_TOOLS_PRD }}"
+          repo_name: "{{ RHEL7_TOOLS_REPO }}"
+          repo_url: "{{ RHEL7_TOOLS_URL }}"
+          download_policy: "{{ DOWNLOAD_POLICY }}"
+        - organization: "{{ organization }}"
+          product: "{{ SAT6C7_PRODUCT }}"
+          repo_name: "{{ CAPSULE7_REPO }}"
+          repo_url: "{{ CAPSULE7_URL }}"
+          download_policy: "{{ DOWNLOAD_POLICY }}"
+        - organization: "{{ organization }}"
+          product: "{{ SAT6M7_PRODUCT }}"
+          repo_name: "{{ MAINTAIN7_REPO }}"
+          repo_url: "{{ MAINTAIN7_URL }}"
+          download_policy: "{{ DOWNLOAD_POLICY }}"
+      when:
+        - SATELLITE_DISTRIBUTION != "GA"
+        - SATELLITE_DISTRIBUTION != "BETA"
+
+    - name: Enable Red Hat repositories
+      include_tasks: tasks/sync_all_repositories.yml
+
+    - name: Creat and add content to content views RHEL 7 CV and RHEL 6 CV
+      include_tasks: tasks/create_content_view.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "RHEL 7 CV"
+          repositories:
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 7 Server Kickstart x86_64 7.6"
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 7 Server RPMs x86_64 7Server"
+            - product: "{{ RHEL7_TOOLS_PRD }}"
+              name: "{{ RHEL7_TOOLS_REPO }}"
+        - organization: "{{ organization }}"
+          cv_name: "RHEL 6 CV"
+          repositories:
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 6 Server Kickstart x86_64 6.10"
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 6 Server RPMs x86_64 6Server"
+            - product: "{{ RHEL6_TOOLS_PRD }}"
+              name: "{{ RHEL6_TOOLS_REPO }}"
+
+    - name: Add Red Hat Software Collections to content views Capsule RHEL 7 CV for Satellite == 6.7
+      include_tasks: tasks/create_content_view.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "Capsule RHEL 7 CV"
+          repositories:
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 7 Server RPMs x86_64 7Server"
+            - product: "Red Hat Ansible Engine"
+              name: "Red Hat Ansible Engine 2 RPMs for Red Hat Enterprise Linux 7 Server x86_64"
+            - product: "{{ RHEL7_TOOLS_PRD }}"
+              name: "{{ RHEL7_TOOLS_REPO }}"
+            - product: "{{ SAT6C7_PRODUCT }}"
+              name: "{{ CAPSULE7_REPO }}"
+            - product: "{{ SAT6M7_PRODUCT }}"
+              name: "{{ MAINTAIN7_REPO }}"
+            - product: "Red Hat Software Collections (for RHEL Server)"
+              name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server x86_64 7Server"
+      when:
+        - RHELOS == "7"
+        - SAT_VERSION == "6.7"
+
+    - name: Add Red Hat Software Collections to content views Capsule RHEL 7 CV for Satellite != 6.7
+      include_tasks: tasks/create_content_view.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "Capsule RHEL 7 CV"
+          repositories:
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 7 Server RPMs x86_64 7Server"
+            - product: "Red Hat Ansible Engine"
+              name: "Red Hat Ansible Engine 2 RPMs for Red Hat Enterprise Linux 7 Server x86_64"
+            - product: "{{ RHEL7_TOOLS_PRD }}"
+              name: "{{ RHEL7_TOOLS_REPO }}"
+            - product: "{{ SAT6C7_PRODUCT }}"
+              name: "{{ CAPSULE7_REPO }}"
+            - product: "{{ SAT6M7_PRODUCT }}"
+              name: "{{ MAINTAIN7_REPO }}"
+            - product: "Red Hat Software Collections for RHEL Server"
+              name: "Red Hat Software Collections RPMs for Red Hat Enterprise Linux 7 Server x86_64 7Server"
+      when:
+        - RHELOS == "7"
+        - SAT_VERSION != "6.7"
+
+    - name: Add content to content views Capsule RHEL 6 CV
+      include_tasks: tasks/create_content_view.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "Capsule RHEL 6 CV"
+          repositories:
+            - product: "Red Hat Enterprise Linux Server"
+              name: "Red Hat Enterprise Linux 6 Server RPMs x86_64 6Server"
+            - product: "{{ RHEL6_TOOLS_PRD }}"
+              name: "{{ RHEL6_TOOLS_REPO }}"
+            - product: "{{ SAT6C6_PRODUCT }}"
+              name: "{{ CAPSULE6_REPO }}"
+      when: RHELOS != "7"
