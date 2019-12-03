@@ -10,6 +10,7 @@
     DOWNLOAD_POLICY: "{{ lookup('env','DOWNLOAD_POLICY') }}"
     SAT_VERSION: "{{ lookup('env','SAT_VERSION') }}"
     MANIFEST_LOCATION_URL: "{{ lookup('env', 'MANIFEST_LOCATION_URL') }}"
+    RHELOS: "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
     organization: "Test Organization"
   tasks:
     - name: Load vars when SATELLITE_DISTRIBUTION == BETA
@@ -268,3 +269,39 @@
             - product: "{{ SAT6C6_PRODUCT }}"
               name: "{{ CAPSULE6_REPO }}"
       when: RHELOS != "7"
+
+    - name: Publish and promote Capsule RHEL 7 CV
+      include_tasks: tasks/publish_and_promote_cv.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "Capsule RHEL 7 CV"
+          lifecycle_environment:
+            - Library
+            - DEV
+      when:
+        - RHELOS == "7"
+
+    - name: Publish and promote RHEL 7 CV and RHEL 6 CV
+      include_tasks: tasks/publish_and_promote_cv.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "RHEL 7 CV"
+          lifecycle_environment:
+            - Library
+            - DEV
+        - organization: "{{ organization }}"
+          cv_name: "RHEL 6 CV"
+          lifecycle_environment:
+            - Library
+            - DEV
+
+    - name: Publish and promote Capsule RHEL 6 CV
+      include_tasks: tasks/publish_and_promote_cv.yml
+      loop:
+        - organization: "{{ organization }}"
+          cv_name: "Capsule RHEL 6 CV"
+          lifecycle_environment:
+            - Library
+            - DEV
+      when:
+        - RHELOS != "7"
