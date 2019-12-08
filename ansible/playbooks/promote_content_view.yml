@@ -9,7 +9,6 @@
         organization: "{{ organization }}"
         content_view: "{{ content_view_name }}"
         current_lifecycle_environment: "{{ from_lifecycle_environment }}"
-        lifecycle_environments:
-          - "{{ to_lifecycle_environment }}"
+        lifecycle_environments: "{{ to_lifecycle_environment }}"
         force_promote: true
         validate_certs: False

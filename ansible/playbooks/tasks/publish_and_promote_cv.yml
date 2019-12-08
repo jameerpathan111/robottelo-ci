@@ -5,5 +5,4 @@
     server_url: "{{ server_url }}"
     content_view: "{{ item.cv_name }}"
     organization: "{{ item.organization }}"
-    lifecycle_environments:
-      - "{{ item.lifecycle_environment }}"
+    lifecycle_environments: "{{ item.lifecycle_environment }}"

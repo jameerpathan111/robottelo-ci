@@ -5,4 +5,5 @@
     server_url: "{{ server_url }}"
     name: "{{ item.ak_name }}"
     organization: "{{ item.organization }}"
-    subscriptions: "{{ item.subscription_name }}"
+    subscriptions: "{{ item.subscriptions | default(omit) }}"
+    content_overrides: "{{ item.content_overrides | default(omit) }}"
