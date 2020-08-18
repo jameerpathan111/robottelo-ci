@@ -166,8 +166,7 @@
             nature: shell
             command:
                 !include-raw:
-                    - 'scripts/satellite6-configure.sh'
-                    - 'scripts/satellite6-configure-variables.sh'
+                    - 'workflows/lib/runSatellitePopulate.groovy'
         - conditional-step:
             condition-kind: regex-match
             regex: (CONFIGURE_CAPSULE)

@@ -1,6 +1,6 @@
 ---
 - name: satellite6-populate-template
-  hosts: localhost
+  hosts: server
   tasks:
     - name: Create lifecycle-environments
       include_tasks: tasks/create_lifecycle_environment.yml
